@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 import os
 from dotenv import load_dotenv
-from typing import List
+from typing import List, Tuple
 
 from gigachat import GigaChat
 from gigachat.models import Chat, Messages, MessagesRole
@@ -40,7 +40,7 @@ class Model:
 
         self.model = GigaChat(**kwargs)
 
-    async def get_response(self, message_history: List[str], current_deadlines: list[tuple[str, datetime]]):
+    async def get_response(self, message_history: List[str], current_deadlines: list[tuple[str, datetime]]) -> List[Tuple[str, datetime]]:
         PAYLOAD = Chat(
             messages=[
                 Messages(

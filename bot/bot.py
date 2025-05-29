@@ -16,6 +16,7 @@ import json
 from copy import deepcopy
 import random
 import hashlib
+from db.crud_user import *
 
 load_dotenv()
 
@@ -28,11 +29,12 @@ dp = Dispatcher(storage=storage)
 
 @dp.message(CommandStart())
 async def start(message: Message, state: FSMContext):
+    user = await UserService.get_or_create(message.from_user)
     await message.answer("ПМИ. Подписаться")
 
 
-async def main():
+async def run_bot():
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    asyncio.run(run_bot())

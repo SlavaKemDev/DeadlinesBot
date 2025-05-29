@@ -2,6 +2,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, BigInteger, ForeignKey, Integer
 from .session import Base
 from typing import Optional, List
+from datetime import datetime
 
 
 class User(Base):
@@ -20,7 +21,7 @@ class User(Base):
 class Group(Base):
     __tablename__ = "groups"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(50))
 
     options: Mapped[List["GroupOption"]] = relationship(
@@ -40,6 +41,9 @@ class GroupOption(Base):
     subscribers: Mapped[List["UserSubscription"]] = relationship(
         back_populates="group_option", cascade="all, delete-orphan"
     )
+    deadlines: Mapped[List["Deadline"]] = relationship(
+        back_populates="group_option", cascade="all, delete-orphan"
+    )
 
 
 class UserSubscription(Base):
@@ -51,3 +55,14 @@ class UserSubscription(Base):
 
     user: Mapped["User"] = relationship(back_populates="subscriptions")
     group_option: Mapped["GroupOption"] = relationship(back_populates="subscribers")
+
+
+class Deadline(Base):
+    __tablename__ = "deadlines"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    group_option_id: Mapped[int] = mapped_column(Integer, ForeignKey("group_options.id"))
+    name: Mapped[str] = mapped_column(String(150))
+    date: Mapped[datetime] = mapped_column()
+
+    group_option: Mapped["GroupOption"] = relationship(back_populates="deadlines")
