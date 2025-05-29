@@ -12,7 +12,10 @@ class DeadlineService:
     async def get_deadlines(group_option: GroupOption) -> List[Deadline]:
         async with AsyncSession() as session:
             result = await session.execute(
-                select(Deadline).where(Deadline.group_option_id == group_option.id)
+                select(Deadline).where(
+                    Deadline.group_option_id == group_option.id,
+                    Deadline.date >= datetime.now()
+                )
             )
 
             return result.scalars()

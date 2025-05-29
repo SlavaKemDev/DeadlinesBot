@@ -1,16 +1,21 @@
 from typing import List
 
+from sqlalchemy.orm import selectinload
+from sqlalchemy import select
+
 from .models import User, Group, GroupOption, UserSubscription
 from .session import AsyncSession
 from aiogram.types import User as TeleUser
-from sqlalchemy import select
+
 
 class GroupService:
     @staticmethod
     async def get_option_by_channel_id(channel_id: int) -> GroupOption:
         async with AsyncSession() as session:
             result = await session.execute(
-                select(GroupOption).where(GroupOption.telegram_channel_id == channel_id)
+                select(GroupOption)
+                .options(selectinload(GroupOption.group))
+                .where(GroupOption.telegram_channel_id == channel_id)
             )
 
             option = result.scalar_one_or_none()

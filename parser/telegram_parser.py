@@ -8,6 +8,7 @@ from db.crud_group import *
 from db.crud_deadline import *
 from ai.model import Model
 from aiogram import Bot
+from pymorphy3 import MorphAnalyzer
 
 
 load_dotenv()
@@ -18,6 +19,7 @@ client = TelegramClient("parser_session", API_ID, API_HASH)
 model = Model()
 bot_sender = Bot(os.environ['BOT_TOKEN'])
 semaphore = asyncio.Semaphore(10)
+morph = MorphAnalyzer()
 
 
 async def send_message(chat_id, text, parse_mode='HTML'):
@@ -69,10 +71,12 @@ async def handler(event):
 
         await DeadlineService.update_deadline(group_option, name, dt)
 
+        datv_group = morph.parse(group_option.group.name)[0].inflect({'datv'}).word
+
         if name in current_deadlines_dict:
-            message = f"📚 Обновление дедлайна \n\n{name}: {current_deadlines_dict[name].strftime('%d.%m.%Y %H:%M:%S')} -> {dt.strftime('%d.%m.%Y %H:%M:%S')}"
+            message = f"📚 Обновление дедлайна по {datv_group} ({group_option.name}) \n\n{name}: {current_deadlines_dict[name].strftime('%d.%m.%Y %H:%M:%S')} -> {dt.strftime('%d.%m.%Y %H:%M:%S')}"
         else:
-            message = f"⚡️Новый дедлайн\n\n{name}: {dt.strftime('%d.%m.%Y %H:%M:%S')}"
+            message = f"⚡️Новый дедлайн по {datv_group} ({group_option.name})\n\n{name}: {dt.strftime('%d.%m.%Y %H:%M:%S')}"
 
         tasks = [send_message(subscriber.id, message) for subscriber in subscribers]
         await asyncio.gather(*tasks)
