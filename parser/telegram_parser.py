@@ -72,6 +72,7 @@ async def handler(event):
         await DeadlineService.update_deadline(group_option, name, dt)
 
         datv_group = morph.parse(group_option.group.name)[0].inflect({'datv'}).word
+        datv_group = datv_group.capitalize()
 
         if name in current_deadlines_dict:
             message = f"📚 Обновление дедлайна по {datv_group} ({group_option.name}) \n\n{name}: {current_deadlines_dict[name].strftime('%d.%m.%Y %H:%M:%S')} -> {dt.strftime('%d.%m.%Y %H:%M:%S')}"
