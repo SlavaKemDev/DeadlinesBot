@@ -28,47 +28,6 @@ async def add_deadline(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-@dp.callback_query(AdminStates.admin_menu, F.data.startswith("change_channel_"))
-async def change_channel(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(AdminStates.edit_option_channel)
-    await state.update_data(option_id=int(callback.data.split("_")[2]))
-    await callback.message.answer("Перешли любой пост из канала, который хочешь прикрепить")
-
-
-@dp.message(AdminStates.edit_option_channel)
-async def process_change_channel(message: Message, state: FSMContext):
-    if not message.forward_from_chat:
-        await message.answer("Пожалуйста, перешли пост из канала.")
-        return
-
-    channel_id = str(message.forward_from_chat.id)
-    channel_name = message.forward_from_chat.title
-
-    if not channel_id.startswith("-100"):
-        await message.answer("Нужно переслать пост из канала!")
-
-    channel_id = int(channel_id[3:])
-
-    data = await state.get_data()
-    option_id = data.get('option_id')
-
-    if not option_id:
-        await message.answer("Ошибка: не указана опция.")
-        return
-
-    option = await GroupService.get_option(option_id)
-    if not option:
-        await message.answer("Опция не найдена.")
-        return
-
-    option.telegram_channel_id = channel_id
-    option.telegram_channel_name = channel_name
-    await GroupService.update_option(option)
-
-    await message.answer(f"Канал '{channel_name}' успешно прикреплен к опции '{option.name}'!")
-    await state.set_state(AdminStates.admin_menu)
-
-
 @dp.callback_query(AdminStates.admin_menu, F.data.startswith("deadline_"))
 async def manage_deadline(callback: CallbackQuery):
     deadline_id = int(callback.data.split("_")[1])
@@ -127,3 +86,116 @@ async def process_add_deadline(message: Message, state: FSMContext):
         await message.answer(f"Дедлайн '{deadline_name}' успешно добавлен для опции '{option.name}'!")
         await state.set_state(AdminStates.admin_menu)
         await state.set_data({})
+
+
+# Edit deadline name
+
+
+@dp.callback_query(AdminStates.admin_menu, F.data.startswith("change_name_deadline_"))
+async def change_deadline_name(callback: CallbackQuery, state: FSMContext):
+    deadline_id = int(callback.data.split("_")[3])
+    deadline = await DeadlineService.get_deadline(deadline_id)
+
+    if not deadline:
+        await callback.answer("Дедлайн не найден.")
+        return
+
+    await state.set_state(AdminStates.edit_deadline_name)
+    await state.update_data(deadline_id=deadline_id)
+
+    await callback.message.answer(f"Введите новое название для дедлайна '{deadline.name}':")
+    await callback.answer()
+
+
+@dp.message(AdminStates.edit_deadline_name)
+async def process_edit_deadline_name(message: Message, state: FSMContext):
+    data = await state.get_data()
+    deadline_id = data.get('deadline_id')
+
+    if not deadline_id:
+        await message.answer("Ошибка: не указан дедлайн.")
+        return
+
+    deadline = await DeadlineService.get_deadline(deadline_id)
+    if not deadline:
+        await message.answer("Дедлайн не найден.")
+        return
+
+    new_name = message.text.strip()
+
+    if not new_name:
+        await message.answer("Название не может быть пустым.")
+        return
+
+    deadline.name = new_name
+    await DeadlineService.update(deadline)
+
+    await message.answer(f"Название дедлайна успешно изменено на '{new_name}'!")
+    await state.set_state(AdminStates.admin_menu)
+    await state.set_data({})
+
+
+# Edit deadline date
+
+
+@dp.callback_query(AdminStates.admin_menu, F.data.startswith("change_date_deadline_"))
+async def change_deadline_date(callback: CallbackQuery, state: FSMContext):
+    deadline_id = int(callback.data.split("_")[3])
+    deadline = await DeadlineService.get_deadline(deadline_id)
+
+    if not deadline:
+        await callback.answer("Дедлайн не найден.")
+        return
+
+    await state.set_state(AdminStates.edit_deadline_date)
+    await state.update_data(deadline_id=deadline_id)
+
+    await callback.message.answer(f"Введите новую дату для дедлайна '{deadline.name}' в формате ДД.ММ.ГГГГ ЧЧ:ММ:")
+    await callback.answer()
+
+
+@dp.message(AdminStates.edit_deadline_date)
+async def process_edit_deadline_date(message: Message, state: FSMContext):
+    data = await state.get_data()
+    deadline_id = data.get('deadline_id')
+
+    if not deadline_id:
+        await message.answer("Ошибка: не указан дедлайн.")
+        return
+
+    deadline = await DeadlineService.get_deadline(deadline_id)
+    if not deadline:
+        await message.answer("Дедлайн не найден.")
+        return
+
+    deadline_date_str = message.text.strip()
+
+    try:
+        deadline_date = datetime.strptime(deadline_date_str, "%d.%m.%Y %H:%M")
+    except ValueError:
+        await message.answer("Неверный формат даты. Используйте ДД.ММ.ГГГГ ЧЧ:ММ.")
+        return
+
+    deadline.date = deadline_date
+    await DeadlineService.update(deadline)
+
+    await message.answer(f"Дата дедлайна успешно изменена на {deadline_date.strftime('%d.%m.%Y %H:%M')}!")
+    await state.set_state(AdminStates.admin_menu)
+    await state.set_data({})
+
+
+# Delete deadline
+
+
+@dp.callback_query(AdminStates.admin_menu, F.data.startswith("delete_deadline_"))
+async def delete_deadline(callback: CallbackQuery):
+    deadline_id = int(callback.data.split("_")[2])
+    deadline = await DeadlineService.get_deadline(deadline_id)
+
+    if not deadline:
+        await callback.answer("Дедлайн не найден.")
+        return
+
+    await DeadlineService.delete(deadline)
+    await callback.message.answer(f"Дедлайн '{deadline.name}' успешно удален!")
+    await callback.answer()

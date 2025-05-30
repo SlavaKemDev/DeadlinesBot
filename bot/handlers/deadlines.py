@@ -20,7 +20,7 @@ def generate_deadlines_list(deadlines: List[Deadline], by_group: bool = True):
         groups = defaultdict(list)
 
         for deadline in deadlines:
-            name = f"{deadline.group_option.group.name} ({deadline.group_option.name})"
+            name = f"{deadline.group_option.group.name} {deadline.group_option.name}"
             groups[name].append(deadline)
 
         keys = sorted(groups.keys())

@@ -78,3 +78,15 @@ class DeadlineService:
                 deadline.date = deadline_date
 
             await session.commit()
+
+    @staticmethod
+    async def update(deadline: Deadline) -> None:
+        async with AsyncSession() as session:
+            await session.merge(deadline)
+            await session.commit()
+
+    @staticmethod
+    async def delete(deadline: Deadline) -> None:
+        async with AsyncSession() as session:
+            await session.delete(deadline)
+            await session.commit()

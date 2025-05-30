@@ -68,3 +68,44 @@ async def manage_option(callback: CallbackQuery):
         reply_markup=keyboards.get_admin_option_keyboard(option, deadlines)
     )
     await callback.answer()
+
+
+@dp.callback_query(AdminStates.admin_menu, F.data.startswith("change_channel_"))
+async def change_channel(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(AdminStates.edit_option_channel)
+    await state.update_data(option_id=int(callback.data.split("_")[2]))
+    await callback.message.answer("Перешли любой пост из канала, который хочешь прикрепить")
+
+
+@dp.message(AdminStates.edit_option_channel)
+async def process_change_channel(message: Message, state: FSMContext):
+    if not message.forward_from_chat:
+        await message.answer("Пожалуйста, перешли пост из канала.")
+        return
+
+    channel_id = str(message.forward_from_chat.id)
+    channel_name = message.forward_from_chat.title
+
+    if not channel_id.startswith("-100"):
+        await message.answer("Нужно переслать пост из канала!")
+
+    channel_id = int(channel_id[3:])
+
+    data = await state.get_data()
+    option_id = data.get('option_id')
+
+    if not option_id:
+        await message.answer("Ошибка: не указана опция.")
+        return
+
+    option = await GroupService.get_option(option_id)
+    if not option:
+        await message.answer("Опция не найдена.")
+        return
+
+    option.telegram_channel_id = channel_id
+    option.telegram_channel_name = channel_name
+    await GroupService.update_option(option)
+
+    await message.answer(f"Канал '{channel_name}' успешно прикреплен к опции '{option.name}'!")
+    await state.set_state(AdminStates.admin_menu)
