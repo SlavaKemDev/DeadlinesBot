@@ -7,9 +7,10 @@ from db.crud_group import *
 from bot.loader import *
 from bot import keyboards
 from bot.states import *
+from bot import consts
 
 
-@dp.message(AdminStates.admin_menu, F.text == keyboards.BTN_ADMIN_GROUPS)
+@dp.message(AdminStates.admin_menu, F.text == consts.BTN_ADMIN_GROUPS)
 async def manage_groups(message: Message):
     groups = await GroupService.get_list()
 

@@ -7,9 +7,10 @@ from db.crud_user import *
 from bot.loader import *
 from bot import keyboards
 from bot.states import *
+from bot import consts
 
 
-@dp.message(MenuStates.main_menu, F.text == keyboards.BTN_ADMIN_PANEL)
+@dp.message(MenuStates.main_menu, F.text == consts.BTN_ADMIN_PANEL)
 async def admin_panel(message: Message, state: FSMContext):
     user = await UserService.get_or_create(message.from_user)
 
@@ -21,7 +22,7 @@ async def admin_panel(message: Message, state: FSMContext):
     await message.answer("Вы вошли в админ-панель", reply_markup=keyboards.get_admin_keyboard())
 
 
-@dp.message(admin_states_filter, F.text == keyboards.BTN_ADMIN_EXIT)
+@dp.message(admin_states_filter, F.text == consts.BTN_ADMIN_EXIT)
 async def exit_admin_panel(message: Message, state: FSMContext):
     await state.set_state(MenuStates.main_menu)
 

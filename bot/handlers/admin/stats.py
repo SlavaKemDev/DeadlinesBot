@@ -4,11 +4,11 @@ from aiogram.types import Message
 from db.crud_user import *
 
 from bot.loader import *
-from bot import keyboards
 from bot.states import *
+from bot import consts
 
 
-@dp.message(AdminStates.admin_menu, F.text == keyboards.BTN_ADMIN_STATS)
+@dp.message(AdminStates.admin_menu, F.text == consts.BTN_ADMIN_STATS)
 async def admin_stats(message: Message):
     # await state.set_state(AdminStates.statistics)
 

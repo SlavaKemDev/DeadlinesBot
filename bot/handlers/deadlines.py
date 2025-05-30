@@ -38,7 +38,7 @@ def generate_deadlines_list(deadlines: List[Deadline], by_group: bool = True):
     return text.strip()
 
 
-@dp.message(MenuStates.main_menu, F.text == keyboards.BTN_UPCOMING_DEADLINES)
+@dp.message(MenuStates.main_menu, F.text == consts.BTN_UPCOMING_DEADLINES)
 async def upcoming_deadlines(message: Message):
     user = await UserService.get_or_create(message.from_user)
     deadlines = await DeadlineService.get_deadlines_for_user(user)

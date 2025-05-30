@@ -70,7 +70,7 @@ async def process_change_channel(message: Message, state: FSMContext):
 
 
 @dp.callback_query(AdminStates.admin_menu, F.data.startswith("deadline_"))
-async def manage_deadline(callback: CallbackQuery, state: FSMContext):
+async def manage_deadline(callback: CallbackQuery):
     deadline_id = int(callback.data.split("_")[1])
     deadline = await DeadlineService.get_deadline(deadline_id)
 

@@ -1,22 +1,19 @@
 from typing import List
 
-from aiogram import Bot, Dispatcher, types
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
-from db.models import User, Group, GroupOption, UserSubscription, Deadline
+from db.models import User, Group, GroupOption, Deadline
 
-BTN_UPCOMING_DEADLINES = "📅 Предстоящие дедлайны"
-BTN_MY_SUBSCRIPTIONS = "📝 Мои подписки"
-BTN_ADMIN_PANEL = "🔧 Админ-панель"
+from . import consts
 
 
 def get_menu_keyboard(user: User) -> ReplyKeyboardMarkup:
     buttons = [
-        [KeyboardButton(text=BTN_UPCOMING_DEADLINES)],
-        [KeyboardButton(text=BTN_MY_SUBSCRIPTIONS)],
+        [KeyboardButton(text=consts.BTN_UPCOMING_DEADLINES)],
+        [KeyboardButton(text=consts.BTN_MY_SUBSCRIPTIONS)],
     ]
 
     if user.is_admin:
-        buttons.append([KeyboardButton(text=BTN_ADMIN_PANEL)])
+        buttons.append([KeyboardButton(text=consts.BTN_ADMIN_PANEL)])
 
     menu_keyboard = ReplyKeyboardMarkup(
         keyboard=buttons,
@@ -26,14 +23,6 @@ def get_menu_keyboard(user: User) -> ReplyKeyboardMarkup:
     )
 
     return menu_keyboard
-
-
-BTN_ADMIN_STATS = "📊 Статистика"
-BTN_ADMIN_USERS = "👥 Управление пользователями"
-BTN_ADMIN_GROUPS = "📚 Управление группами"
-BTN_ADMIN_EXIT = "🏠 Выйти из админ-панели"
-
-BTN_ADD_GROUP = "➕ Добавить группу"
 
 
 def get_deadlines_list_keyboard(by_group: bool = True) -> InlineKeyboardMarkup:
@@ -71,10 +60,10 @@ def get_subscriptions_keyboard(my_subscriptions: List[GroupOption], all_groups: 
 
 def get_admin_keyboard() -> ReplyKeyboardMarkup:
     buttons = [
-        [KeyboardButton(text=BTN_ADMIN_STATS)],
-        [KeyboardButton(text=BTN_ADMIN_USERS)],
-        [KeyboardButton(text=BTN_ADMIN_GROUPS)],
-        [KeyboardButton(text=BTN_ADMIN_EXIT)],
+        [KeyboardButton(text=consts.BTN_ADMIN_STATS)],
+        [KeyboardButton(text=consts.BTN_ADMIN_USERS)],
+        [KeyboardButton(text=consts.BTN_ADMIN_GROUPS)],
+        [KeyboardButton(text=consts.BTN_ADMIN_EXIT)],
     ]
 
     admin_keyboard = ReplyKeyboardMarkup(
@@ -103,7 +92,7 @@ def get_admin_groups(groups: List[Group]) -> InlineKeyboardMarkup:
     buttons.append(
         [
             InlineKeyboardButton(
-                text=BTN_ADD_GROUP,
+                text=consts.BTN_ADD_GROUP,
                 callback_data=f"add_group"
             )
         ]

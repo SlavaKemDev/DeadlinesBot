@@ -10,7 +10,7 @@ from db.crud_user import *
 from db.crud_group import *
 
 
-@dp.message(MenuStates.main_menu, F.text == keyboards.BTN_MY_SUBSCRIPTIONS)
+@dp.message(MenuStates.main_menu, F.text == consts.BTN_MY_SUBSCRIPTIONS)
 async def my_subscriptions(message: Message):
     user = await UserService.get_or_create(message.from_user)
 
