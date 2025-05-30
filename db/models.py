@@ -13,6 +13,8 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(String(50))
     username: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
 
+    is_admin: Mapped[bool] = mapped_column(server_default='0', default=False)
+
     subscriptions: Mapped[List["UserSubscription"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )

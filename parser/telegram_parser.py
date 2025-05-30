@@ -36,7 +36,6 @@ async def send_message(chat_id, text, parse_mode='HTML'):
 @client.on(events.NewMessage())
 async def handler(event):
     message = event.message
-    print(message)
 
     if not isinstance(message.peer_id, telethon.tl.types.PeerChannel):
         # Ignore messages from users
