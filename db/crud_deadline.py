@@ -27,6 +27,16 @@ class DeadlineService:
             return result.scalars()
 
     @staticmethod
+    async def get_deadline(deadline_id: int) -> Deadline:
+        async with AsyncSession() as session:
+            result = await session.execute(
+                select(Deadline).where(Deadline.id == deadline_id)
+                .options(selectinload(Deadline.group_option).selectinload(GroupOption.group))
+            )
+
+            return result.scalar_one_or_none()
+
+    @staticmethod
     async def get_deadlines_for_user(user: User):
         async with AsyncSession() as session:
             result = await session.execute(

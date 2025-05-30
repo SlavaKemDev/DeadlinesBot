@@ -1,7 +1,7 @@
 from .models import User
 from .session import AsyncSession
 from aiogram.types import User as TeleUser
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 
 class UserService:
@@ -33,3 +33,11 @@ class UserService:
                 await session.commit()
 
                 return user
+
+    @staticmethod
+    async def users_count() -> int:
+        async with AsyncSession() as session:
+            result = await session.execute(select(func.count()).select_from(User))
+            user_count = result.scalar_one()
+
+            return user_count

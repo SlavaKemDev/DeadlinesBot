@@ -34,15 +34,35 @@ class GroupService:
             return subscriptions
 
     @staticmethod
+    async def get_group(group_id: int) -> Group:
+        async with AsyncSession() as session:
+            result = await session.execute(
+                select(Group)
+                .where(Group.id == group_id)
+                .options(selectinload(Group.options))
+            )
+
+            group = result.scalar_one_or_none()
+
+            return group
+
+    @staticmethod
     async def get_option(group_option_id: int):
         async with AsyncSession() as session:
             result = await session.execute(
                 select(GroupOption).where(GroupOption.id == group_option_id)
+                .options(selectinload(GroupOption.group))
             )
 
             option = result.scalar_one_or_none()
 
             return option
+
+    @staticmethod
+    async def update_option(group_option: GroupOption) -> None:
+        async with AsyncSession() as session:
+            await session.merge(group_option)
+            await session.commit()
 
     @staticmethod
     async def toggle_subscription(user: User, group_option: GroupOption):
@@ -98,3 +118,25 @@ class GroupService:
             subscribers = result.scalars().all()
 
             return subscribers
+
+    @staticmethod
+    async def create_group(name: str) -> Group:
+        async with AsyncSession() as session:
+            group = Group(name=name)
+            session.add(group)
+            await session.commit()
+            await session.refresh(group)
+            return group
+
+    @staticmethod
+    async def create_option(group: Group, name: str) -> GroupOption:
+        async with AsyncSession() as session:
+            option = GroupOption(
+                group_id=group.id,
+                name=name
+            )
+
+            session.add(option)
+            await session.commit()
+            await session.refresh(option)
+            return option
