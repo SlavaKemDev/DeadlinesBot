@@ -62,7 +62,7 @@ async def handler(event):
     current_deadlines_list = [(deadline.name, deadline.date) for deadline in current_deadlines]
     current_deadlines_dict = {name: date for name, date in current_deadlines_list}
 
-    deadlines = await model.get_response(texts, current_deadlines_list)  # Extract deadlines update from LLM
+    deadlines = await model.get_deadlines(texts, current_deadlines_list)  # Extract deadlines update from LLM
 
     for name, dt in deadlines:
         if name in current_deadlines_dict and current_deadlines_dict[name] == dt:

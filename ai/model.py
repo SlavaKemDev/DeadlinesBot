@@ -40,7 +40,7 @@ class Model:
 
         self.model = GigaChat(**kwargs)
 
-    async def get_response(self, message_history: List[str], current_deadlines: list[tuple[str, datetime]]) -> List[Tuple[str, datetime]]:
+    async def get_deadlines(self, message_history: List[str], current_deadlines: list[tuple[str, datetime]]) -> List[Tuple[str, datetime]]:
         PAYLOAD = Chat(
             messages=[
                 Messages(
@@ -64,3 +64,21 @@ class Model:
             new_deadlines[i] = (new_deadlines[i][0], datetime.strptime(new_deadlines[i][1], "%d.%m.%Y %H:%M:%S"))
 
         return new_deadlines
+
+    async def create_notification(self, group_name: str, deadline_name: str, remaining_time: str) -> str:
+        PAYLOAD = Chat(
+            messages=[
+                Messages(
+                    role=MessagesRole.USER,
+                    content=f"Сгенерируй шутливое с долей сарказма напоминание о том, что дедлайн по \"{deadline_name}\" по дисциплине \"{group_name}\" уже через {remaining_time}. В уведомлении обязательно упомяни время, которое осталось до дедлайна (ранее указал). Не выводи ничего, кроме самого напоминания.",
+                ),
+            ],
+            update_interval=0.1,
+        )
+
+        answer = ""
+
+        async for chunk in self.model.astream(PAYLOAD):
+            answer += chunk.choices[0].delta.content
+
+        return answer

@@ -2,11 +2,11 @@ from typing import List
 
 from sqlalchemy.orm import selectinload
 
-from .models import User, Group, GroupOption, UserSubscription, Deadline
+from .models import User, Group, GroupOption, UserSubscription, Deadline, Notification
 from .session import AsyncSession
 from aiogram.types import User as TeleUser
 from sqlalchemy import select
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class DeadlineService:
@@ -51,6 +51,29 @@ class DeadlineService:
                     selectinload(Deadline.group_option).selectinload(GroupOption.group)
                 )
                 .order_by(Deadline.date)
+            )
+
+            return result.scalars().all()
+
+    @staticmethod
+    async def get_deadlines_within(seconds: int) -> List[Deadline]:
+        now = datetime.now()
+
+        async with AsyncSession() as session:
+            subquery = (
+                select(Notification.deadline_id)
+                .where(Notification.offset <= seconds)
+                .subquery()
+            )
+
+            result = await session.execute(
+                select(Deadline)
+                .where(
+                    Deadline.date > now,
+                    Deadline.date <= now + timedelta(seconds=seconds),
+                    Deadline.id.not_in(select(subquery))  # remove already notified deadlines
+                )
+                .options(selectinload(Deadline.group_option).selectinload(GroupOption.group))
             )
 
             return result.scalars().all()

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, BigInteger, ForeignKey, Integer
+from sqlalchemy import String, BigInteger, ForeignKey, Integer, UniqueConstraint
 from .session import Base
 from typing import Optional, List
 from datetime import datetime
@@ -68,3 +68,18 @@ class Deadline(Base):
     date: Mapped[datetime] = mapped_column()
 
     group_option: Mapped["GroupOption"] = relationship(back_populates="deadlines")
+    notifications: Mapped[List["Notification"]] = relationship(back_populates="deadline")
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    deadline_id: Mapped[int] = mapped_column(Integer, ForeignKey("deadlines.id"))
+    offset: Mapped[int] = mapped_column(Integer, default=0)
+
+    deadline: Mapped["Deadline"] = relationship(back_populates="notifications")
+
+    __table_args__ = (
+        UniqueConstraint("deadline_id", "offset"),
+    )

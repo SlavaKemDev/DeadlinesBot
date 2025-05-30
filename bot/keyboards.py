@@ -109,7 +109,7 @@ def get_admin_group_options(group: Group) -> InlineKeyboardMarkup:
         buttons.append(
             [
                 InlineKeyboardButton(
-                    text=f"{option.name}",
+                    text=f"{option.name or 'Без имени'}",
                     callback_data=f"option_{option.id}"
                 )
             ]
