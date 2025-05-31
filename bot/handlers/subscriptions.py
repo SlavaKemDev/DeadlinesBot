@@ -14,7 +14,7 @@ from db.crud_group import *
 async def my_subscriptions(message: Message):
     user = await UserService.get_or_create(message.from_user)
 
-    groups_list = await GroupService.get_list()
+    groups_list = await GroupService.get_list(user.study_program)
     subscriptions = await GroupService.get_subscriptions(user)
 
     kb = keyboards.get_subscriptions_keyboard(subscriptions, groups_list)
@@ -24,9 +24,9 @@ async def my_subscriptions(message: Message):
 
 @dp.callback_query(MenuStates.main_menu, F.data.startswith("option_"))
 async def toggle_subscription(callback: CallbackQuery):
-    group_option_id = int(callback.data.split("_")[1])
-
     user = await UserService.get_or_create(callback.from_user)
+
+    group_option_id = int(callback.data.split("_")[1])
     group_option = await GroupService.get_option(group_option_id)
 
     if not group_option:
@@ -38,7 +38,7 @@ async def toggle_subscription(callback: CallbackQuery):
     text = "Выбери, по каким дисциплинам хочешь получать уведомления"
     kb = keyboards.get_subscriptions_keyboard(
         await GroupService.get_subscriptions(user),
-        await GroupService.get_list()
+        await GroupService.get_list(user.study_program)
     )
 
     await callback.message.edit_text(text, reply_markup=kb)

@@ -5,6 +5,21 @@ from typing import Optional, List
 from datetime import datetime
 
 
+class StudyProgram(Base):
+    __tablename__ = "study_programs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(100))
+
+    groups: Mapped[List["Group"]] = relationship(
+        back_populates="study_program", cascade="all, delete-orphan"
+    )
+
+    users: Mapped[List["User"]] = relationship(
+        back_populates="study_program", cascade="all, delete-orphan"
+    )
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -12,6 +27,9 @@ class User(Base):
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50))
     username: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+
+    study_program_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("study_programs.id"), nullable=True)
+    study_program = relationship("StudyProgram", back_populates="users")
 
     is_admin: Mapped[bool] = mapped_column(server_default='0', default=False)
 
@@ -25,6 +43,9 @@ class Group(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(50))
+
+    study_program_id: Mapped[int] = mapped_column(Integer, ForeignKey("study_programs.id"))
+    study_program = relationship("StudyProgram", back_populates="groups")
 
     options: Mapped[List["GroupOption"]] = relationship(
         back_populates="group", cascade="all, delete-orphan"

@@ -1,9 +1,26 @@
 from typing import List
 
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
-from db.models import User, Group, GroupOption, Deadline
+from db.models import User, Group, GroupOption, Deadline, StudyProgram
 
 from . import consts
+
+
+def get_select_study_programs_keyboard(study_programs: List[StudyProgram]) -> InlineKeyboardMarkup:
+    buttons = []
+
+    for study_program in study_programs:
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text=study_program.name,
+                    callback_data=f"study_program_{study_program.id}"
+                )
+            ]
+        )
+
+    select_study_programs_keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    return select_study_programs_keyboard
 
 
 def get_menu_keyboard(user: User) -> ReplyKeyboardMarkup:
@@ -76,14 +93,40 @@ def get_admin_keyboard() -> ReplyKeyboardMarkup:
     return admin_keyboard
 
 
-def get_admin_groups(groups: List[Group]) -> InlineKeyboardMarkup:
+def get_admin_study_programs(study_programs: List[StudyProgram]) -> InlineKeyboardMarkup:
     buttons = []
 
-    for group in groups:
+    for study_program in study_programs:
         buttons.append(
             [
                 InlineKeyboardButton(
-                    text=group.name,
+                    text=study_program.name,
+                    callback_data=f"study_program_{study_program.id}"
+                )
+            ]
+        )
+
+    buttons.append(
+        [
+            InlineKeyboardButton(
+                text=consts.BTN_ADD_STUDY_PROGRAM,
+                callback_data=f"add_study_program"
+            )
+        ]
+    )
+
+    admin_study_programs_keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    return admin_study_programs_keyboard
+
+
+def get_admin_study_program_options(study_program: StudyProgram) -> InlineKeyboardMarkup:
+    buttons = []
+
+    for group in study_program.groups:
+        buttons.append(
+            [
+                InlineKeyboardButton(
+                    text=f"{group.name or 'Без имени'}",
                     callback_data=f"group_{group.id}"
                 )
             ]
@@ -93,13 +136,13 @@ def get_admin_groups(groups: List[Group]) -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(
                 text=consts.BTN_ADD_GROUP,
-                callback_data=f"add_group"
+                callback_data=f"add_group_{study_program.id}"
             )
         ]
     )
 
-    admin_groups_keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
-    return admin_groups_keyboard
+    admin_group_options_keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+    return admin_group_options_keyboard
 
 
 def get_admin_group_options(group: Group) -> InlineKeyboardMarkup:

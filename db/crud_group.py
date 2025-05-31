@@ -1,19 +1,24 @@
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select
 
-from .models import User, Group, GroupOption, UserSubscription
+from .models import User, Group, GroupOption, UserSubscription, StudyProgram
 from .session import AsyncSession
 from aiogram.types import User as TeleUser
 
 
 class GroupService:
     @staticmethod
-    async def get_list():
+    async def get_list(study_program: Optional[StudyProgram]) -> List[Group]:
+        if not study_program:
+            return []
+
         async with AsyncSession() as session:
             result = await session.execute(
-                select(Group).options(selectinload(Group.options))
+                select(Group)
+                .where(Group.study_program_id == study_program.id)
+                .options(selectinload(Group.options))
             )
 
             groups = result.scalars().all()
@@ -120,9 +125,13 @@ class GroupService:
             return subscribers
 
     @staticmethod
-    async def create_group(name: str) -> Group:
+    async def create_group(study_program: StudyProgram, name: str) -> Group:
         async with AsyncSession() as session:
-            group = Group(name=name)
+            group = Group(
+                study_program_id=study_program.id,
+                name=name
+            )
+
             session.add(group)
             await session.commit()
             await session.refresh(group)

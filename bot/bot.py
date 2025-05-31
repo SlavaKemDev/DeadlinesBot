@@ -8,6 +8,7 @@ from .handlers.subscriptions import *
 from .handlers.admin.panel import *
 from .handlers.admin.stats import *
 from .handlers.admin.users import *
+from .handlers.admin.study_programs import *
 from .handlers.admin.groups import *
 from .handlers.admin.options import *
 from .handlers.admin.deadlines import *

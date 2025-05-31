@@ -3,11 +3,15 @@ from aiogram.fsm.state import StatesGroup, State
 
 
 class MenuStates(StatesGroup):
+    select_study_program = State()
     main_menu = State()
 
 
 class AdminStates(StatesGroup):
     admin_menu = State()
+
+    add_study_program = State()
+    edit_study_program_name = State()
 
     add_group = State()
     edit_group_name = State()
@@ -21,4 +25,5 @@ class AdminStates(StatesGroup):
     edit_deadline_date = State()
 
 
+# filter to check if user in admin panel
 admin_states_filter = StateFilter(*[state for state in AdminStates.__all_states__])

@@ -10,7 +10,7 @@ from bot import keyboards
 from bot.states import *
 
 
-@dp.callback_query(AdminStates.admin_menu, F.data.startswith("add_option"))
+@dp.callback_query(AdminStates.admin_menu, F.data.startswith("add_option_"))
 async def add_option(callback: CallbackQuery, state: FSMContext):
     group_id = int(callback.data.split("_")[2])
     group = await GroupService.get_group(group_id)
